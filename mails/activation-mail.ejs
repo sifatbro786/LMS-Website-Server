@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ELearning Activation Email</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style type="text/css">
+            /* Reset and base */
+            body,
+            html {
+                margin: 0;
+                padding: 0;
+                width: 100% !important;
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background: #f5f7fa;
+                color: #333333;
+            }
+            a {
+                color: #0070f3;
+                text-decoration: none;
+            }
+            a:hover {
+                text-decoration: underline;
+            }
+            h1 {
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0 0 20px 0;
+                text-align: center;
+                color: #ffffff;
+            }
+            h2 {
+                font-size: 36px;
+                font-weight: 700;
+                text-align: center;
+                color: #0070f3;
+                margin: 20px 0;
+                letter-spacing: 6px;
+            }
+            p {
+                font-size: 16px;
+                line-height: 1.6;
+                margin: 0 0 20px 0;
+            }
+
+            /* Container */
+            .email-wrapper {
+                max-width: 600px;
+                margin: 40px auto;
+                background: #ffffff;
+                border-radius: 12px;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+
+            /* Header */
+            .email-header {
+                background: linear-gradient(135deg, #0050ef, #1a73e8);
+                padding: 40px 30px;
+                color: #ffffff;
+            }
+
+            /* Body */
+            .email-body {
+                padding: 30px 40px;
+                color: #555555;
+                font-weight: 500;
+            }
+
+            /* Button */
+            .button {
+                display: block;
+                width: fit-content;
+                margin: 30px auto 0 auto;
+                background-color: #0070f3;
+                color: #fff !important;
+                font-size: 18px;
+                font-weight: 700;
+                padding: 15px 35px;
+                border-radius: 30px;
+                text-align: center;
+                text-decoration: none;
+                box-shadow: 0 4px 14px rgba(0, 112, 243, 0.4);
+                transition: background-color 0.3s ease, box-shadow 0.3s ease;
+                letter-spacing: 1.5px;
+            }
+            .button:hover {
+                background-color: #0059c1;
+                box-shadow: 0 6px 20px rgba(0, 89, 193, 0.6);
+            }
+
+            /* Footer */
+            .email-footer {
+                background-color: #f1f3f5;
+                padding: 20px 40px;
+                text-align: center;
+                font-size: 14px;
+                color: #888888;
+                font-style: italic;
+                border-top: 1px solid #e0e0e0;
+            }
+
+            /* Responsive */
+            @media screen and (max-width: 640px) {
+                .email-wrapper {
+                    margin: 20px 10px;
+                }
+                .email-body,
+                .email-footer,
+                .email-header {
+                    padding-left: 20px !important;
+                    padding-right: 20px !important;
+                }
+                h1 {
+                    font-size: 24px;
+                }
+                h2 {
+                    font-size: 28px;
+                    letter-spacing: 4px;
+                }
+                .button {
+                    font-size: 16px;
+                    padding: 12px 28px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="email-wrapper">
+            <div class="email-header">
+                <h1>Welcome to ELearning</h1>
+            </div>
+            <div class="email-body">
+                <p>Hello, <%= user.name %>,</p>
+                <p>
+                    Thank you for registering on ELearning. To activate your account, please use the
+                    following activation code:
+                </p>
+                <h2><%= activationCode %></h2>
+                <p>Please enter this code on the activation page within the next 5 minutes.</p>
+                <p>If you did not register for an ELearning account, please ignore this email.</p>
+                <a href="#" class="button">Activate Account</a>
+            </div>
+            <div class="email-footer">
+                <p>
+                    If you have any questions, please don't hesitate to contact us at
+                    <a href="mailto:support@ELearning.com">support@ELearning.com</a>
+                </p>
+            </div>
+        </div>
+    </body>
+</html>
