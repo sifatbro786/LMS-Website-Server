@@ -5,7 +5,7 @@ const userModel = require("../models/user.model");
 const ErrorHandler = require("../utils/ErrorHandler");
 const sendMail = require("../utils/sendMail");
 const { CatchAsyncError } = require("../middleware/catchAsyncError");
-const { sendToken } = require("../utils/jwt");
+const { sendToken, accessTokenOptions, refreshTokenOptions } = require("../utils/jwt");
 const { redis } = require("../utils/redis");
 
 //* register user:
@@ -130,10 +130,45 @@ const logoutUser = CatchAsyncError(async (req, res, next) => {
     }
 });
 
+//* update access token:
+const updateAccessToken = CatchAsyncError(async (req, res, next) => {
+    try {
+        const refresh_token = req.cookies.refresh_token;
+        const decoded = jwt.verify(refresh_token, process.env.REFRESH_TOKEN);
+        if (!decoded) {
+            return next(new ErrorHandler("Your refresh token is invalid", 400));
+        }
+
+        const session = await redis.get(decoded.id);
+        if (!session) {
+            return next(new ErrorHandler("User not found", 400));
+        }
+
+        const user = JSON.parse(session);
+        const accessToken = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN, {
+            expiresIn: "5m",
+        });
+        const refreshToken = jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN, {
+            expiresIn: "3d",
+        });
+
+        res.cookie("access_token", accessToken, accessTokenOptions);
+        res.cookie("refresh_token", refreshToken, refreshTokenOptions);
+
+        res.status(200).json({
+            status: true,
+            accessToken,
+        });
+    } catch (err) {
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
 module.exports = {
     registrationUser,
     createActivationToken,
     activateUser,
     loginUser,
     logoutUser,
+    updateAccessToken,
 };
