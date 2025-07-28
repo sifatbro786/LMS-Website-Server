@@ -5,6 +5,8 @@ const userModel = require("../models/user.model");
 const ErrorHandler = require("../utils/ErrorHandler");
 const sendMail = require("../utils/sendMail");
 const { CatchAsyncError } = require("../middleware/catchAsyncError");
+const { sendToken } = require("../utils/jwt");
+const { redis } = require("../utils/redis");
 
 //* register user:
 const registrationUser = CatchAsyncError(async (req, res, next) => {
@@ -87,8 +89,51 @@ const activateUser = CatchAsyncError(async (req, res, next) => {
     }
 });
 
+//* login user:
+const loginUser = CatchAsyncError(async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return next(new ErrorHandler("Please enter email and password", 400));
+        }
+
+        const user = await userModel.findOne({ email }).select("+password");
+        if (!user) {
+            return next(new ErrorHandler("Invalid email or password", 400));
+        }
+
+        const isPasswordMatched = await user.comparePassword(password);
+        if (!isPasswordMatched) {
+            return next(new ErrorHandler("Invalid email or password", 400));
+        }
+
+        sendToken(user, 200, res);
+    } catch (err) {
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
+//* logout user:
+const logoutUser = CatchAsyncError(async (req, res, next) => {
+    try {
+        res.cookie("access_token", "", { maxAge: 1 });
+        res.cookie("refresh_token", "", { maxAge: 1 });
+
+        redis.del(req.user._id.toString());
+
+        res.status(200).json({
+            success: true,
+            message: "Logged out successfully!",
+        });
+    } catch (err) {
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
 module.exports = {
     registrationUser,
     createActivationToken,
     activateUser,
+    loginUser,
+    logoutUser,
 };

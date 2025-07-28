@@ -1,5 +1,9 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 const emailRegexPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -50,6 +54,16 @@ userSchema.pre("save", async function (next) {
     this.password = await bcrypt.hash(this.password, 10);
     next();
 });
+
+// signin access token:
+userSchema.methods.getJWTToken = function () {
+    return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN);
+};
+
+// signin refresh token:
+userSchema.methods.getRefreshToken = function () {
+    return jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN);
+};
 
 // compare password:
 userSchema.methods.comparePassword = async function (enteredPassword) {
