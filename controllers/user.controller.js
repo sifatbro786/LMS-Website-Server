@@ -8,6 +8,7 @@ const { CatchAsyncError } = require("../middleware/catchAsyncError");
 const { sendToken, accessTokenOptions, refreshTokenOptions } = require("../utils/jwt");
 const { redis } = require("../utils/redis");
 const { getUserById } = require("../services/user.service");
+const { cloudinary } = require("../utils/cloudinary");
 
 //* register user:
 const registrationUser = CatchAsyncError(async (req, res, next) => {
@@ -153,6 +154,8 @@ const updateAccessToken = CatchAsyncError(async (req, res, next) => {
             expiresIn: "3d",
         });
 
+        req.user = user;
+
         res.cookie("access_token", accessToken, accessTokenOptions);
         res.cookie("refresh_token", refreshToken, refreshTokenOptions);
 
@@ -192,6 +195,121 @@ const socialAuth = CatchAsyncError(async (req, res, next) => {
     }
 });
 
+//* update user info:
+const updateUserInfo = CatchAsyncError(async (req, res, next) => {
+    try {
+        const { name, email } = req.body;
+        const userId = req.user._id;
+        const user = await userModel.findById(userId);
+
+        if (email && user) {
+            const isEmailExist = await userModel.findOne({ email });
+            if (isEmailExist) {
+                return next(new ErrorHandler("Email already exist", 400));
+            }
+            user.email = email;
+        }
+
+        if (name && user) {
+            user.name = name;
+        }
+
+        await user.save();
+        await redis.set(userId, JSON.stringify(user));
+
+        res.status(200).json({
+            success: true,
+            message: "User info updated successfully!",
+            user,
+        });
+    } catch (err) {
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
+//* update password:
+const updatePassword = CatchAsyncError(async (req, res, next) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        if (!oldPassword || !newPassword) {
+            return next(new ErrorHandler("Please enter old and new password", 400));
+        }
+
+        const user = await userModel.findById(req.user?._id).select("+password");
+        if (user.password === undefined) {
+            return next(new ErrorHandler("Password not found", 400));
+        }
+
+        if (oldPassword === newPassword) {
+            return next(new ErrorHandler("Old and new password are same", 400));
+        }
+
+        const isPasswordMatch = await user.comparePassword(oldPassword);
+        if (!isPasswordMatch) {
+            return next(new ErrorHandler("Old password is incorrect", 400));
+        }
+
+        user.password = newPassword;
+
+        await user.save();
+        await redis.set(user._id.toString(), JSON.stringify(user));
+
+        res.status(200).json({
+            success: true,
+            message: "Password updated successfully!",
+            user,
+        });
+    } catch (err) {
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
+//* update profile picture:
+const updateProfilePicture = CatchAsyncError(async (req, res, next) => {
+    try {
+        const { avatar } = req.body;
+        const userId = req.user?._id;
+        const user = await userModel.findById(userId);
+
+        if (!user) {
+            return next(new ErrorHandler("User not found", 404));
+        }
+
+        if (!avatar) {
+            return next(new ErrorHandler("No avatar provided", 400));
+        }
+
+        // Delete old avatar if exists
+        if (user.avatar?.public_id) {
+            await cloudinary.uploader.destroy(user.avatar.public_id);
+        }
+
+        // Upload new avatar
+        const result = await cloudinary.uploader.upload(avatar, {
+            folder: "avatars",
+            width: 150,
+            crop: "scale",
+        });
+
+        // Update user
+        user.avatar = {
+            public_id: result.public_id,
+            url: result.secure_url,
+        };
+
+        await user.save();
+        await redis.set(user._id.toString(), JSON.stringify(user));
+
+        res.status(200).json({
+            success: true,
+            message: "Profile picture updated successfully!",
+            user,
+        });
+    } catch (err) {
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
 module.exports = {
     registrationUser,
     createActivationToken,
@@ -201,4 +319,7 @@ module.exports = {
     updateAccessToken,
     getUserInfo,
     socialAuth,
+    updateUserInfo,
+    updatePassword,
+    updateProfilePicture,
 };
