@@ -56,7 +56,7 @@ userSchema.pre("save", async function (next) {
 
 // signin access token:
 userSchema.methods.getJWTToken = function () {
-    return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN,{
+    return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN, {
         expiresIn: "5m",
     });
 };
@@ -73,6 +73,6 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 };
 
-const userModel = mongoose.model("User", userSchema);
+const UserModel = mongoose.models.User ?? mongoose.model("User", userSchema);
 
-module.exports = userModel;
+module.exports = UserModel;

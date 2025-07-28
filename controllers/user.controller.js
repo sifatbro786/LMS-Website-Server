@@ -1,7 +1,7 @@
 const path = require("path");
 const ejs = require("ejs");
 const jwt = require("jsonwebtoken");
-const userModel = require("../models/user.model");
+const UserModel = require("../models/user.model");
 const ErrorHandler = require("../utils/ErrorHandler");
 const sendMail = require("../utils/sendMail");
 const { CatchAsyncError } = require("../middleware/catchAsyncError");
@@ -15,7 +15,7 @@ const registrationUser = CatchAsyncError(async (req, res, next) => {
     try {
         const { name, email, password } = req.body;
 
-        const isEmailExists = await userModel.findOne({ email });
+        const isEmailExists = await UserModel.findOne({ email });
         if (isEmailExists) {
             return next(new ErrorHandler("Email already exists", 400));
         }
@@ -74,12 +74,12 @@ const activateUser = CatchAsyncError(async (req, res, next) => {
         }
 
         const { name, email, password } = newUser.user;
-        const existUser = await userModel.findOne({ email });
+        const existUser = await UserModel.findOne({ email });
         if (existUser) {
             return next(new ErrorHandler("User already exists", 400));
         }
 
-        const user = await userModel.create({ name, email, password });
+        const user = await UserModel.create({ name, email, password });
 
         res.status(201).json({
             success: true,
@@ -99,7 +99,7 @@ const loginUser = CatchAsyncError(async (req, res, next) => {
             return next(new ErrorHandler("Please enter email and password", 400));
         }
 
-        const user = await userModel.findOne({ email }).select("+password");
+        const user = await UserModel.findOne({ email }).select("+password");
         if (!user) {
             return next(new ErrorHandler("Invalid email or password", 400));
         }
@@ -183,9 +183,9 @@ const socialAuth = CatchAsyncError(async (req, res, next) => {
     try {
         const { email, name, avatar } = req.body;
 
-        const user = await userModel.findOne({ email });
+        const user = await UserModel.findOne({ email });
         if (!user) {
-            const newUser = await userModel.create({ email, name, avatar });
+            const newUser = await UserModel.create({ email, name, avatar });
             sendToken(newUser, 200, res);
         } else {
             sendToken(user, 200, res);
@@ -200,10 +200,10 @@ const updateUserInfo = CatchAsyncError(async (req, res, next) => {
     try {
         const { name, email } = req.body;
         const userId = req.user._id;
-        const user = await userModel.findById(userId);
+        const user = await UserModel.findById(userId);
 
         if (email && user) {
-            const isEmailExist = await userModel.findOne({ email });
+            const isEmailExist = await UserModel.findOne({ email });
             if (isEmailExist) {
                 return next(new ErrorHandler("Email already exist", 400));
             }
@@ -235,7 +235,7 @@ const updatePassword = CatchAsyncError(async (req, res, next) => {
             return next(new ErrorHandler("Please enter old and new password", 400));
         }
 
-        const user = await userModel.findById(req.user?._id).select("+password");
+        const user = await UserModel.findById(req.user?._id).select("+password");
         if (user.password === undefined) {
             return next(new ErrorHandler("Password not found", 400));
         }
@@ -269,7 +269,7 @@ const updateProfilePicture = CatchAsyncError(async (req, res, next) => {
     try {
         const { avatar } = req.body;
         const userId = req.user?._id;
-        const user = await userModel.findById(userId);
+        const user = await UserModel.findById(userId);
 
         if (!user) {
             return next(new ErrorHandler("User not found", 404));
