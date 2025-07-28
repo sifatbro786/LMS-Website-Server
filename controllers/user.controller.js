@@ -7,6 +7,7 @@ const sendMail = require("../utils/sendMail");
 const { CatchAsyncError } = require("../middleware/catchAsyncError");
 const { sendToken, accessTokenOptions, refreshTokenOptions } = require("../utils/jwt");
 const { redis } = require("../utils/redis");
+const { getUserById } = require("../services/user.service");
 
 //* register user:
 const registrationUser = CatchAsyncError(async (req, res, next) => {
@@ -164,6 +165,33 @@ const updateAccessToken = CatchAsyncError(async (req, res, next) => {
     }
 });
 
+//* get user info:
+const getUserInfo = CatchAsyncError(async (req, res, next) => {
+    try {
+        const userId = req.user._id;
+        await getUserById(userId, res);
+    } catch (err) {
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
+//* social auth:
+const socialAuth = CatchAsyncError(async (req, res, next) => {
+    try {
+        const { email, name, avatar } = req.body;
+
+        const user = await userModel.findOne({ email });
+        if (!user) {
+            const newUser = await userModel.create({ email, name, avatar });
+            sendToken(newUser, 200, res);
+        } else {
+            sendToken(user, 200, res);
+        }
+    } catch (err) {
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
 module.exports = {
     registrationUser,
     createActivationToken,
@@ -171,4 +199,6 @@ module.exports = {
     loginUser,
     logoutUser,
     updateAccessToken,
+    getUserInfo,
+    socialAuth,
 };
