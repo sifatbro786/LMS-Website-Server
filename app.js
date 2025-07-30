@@ -3,6 +3,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const { errorMiddleware } = require("./middleware/error");
 const userRouter = require("./routes/user.route");
+const courseRouter = require("./routes/course.route");
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(
 
 //* routes:
 app.use("/api/v1", userRouter);
+app.use("/api/v1", courseRouter);
 
 //* testing route
 app.get("/", (req, res) => {
