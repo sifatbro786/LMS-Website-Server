@@ -123,4 +123,43 @@ const getAllCourses = CatchAsyncError(async (req, res, next) => {
     }
 });
 
-module.exports = { uploadCourse, editCourse, getSingleCourse, getAllCourses };
+//* get course content only for valid user:
+const getCourseByUser = CatchAsyncError(async (req, res, next) => {
+    try {
+        const userCourseList = req.user?.courses;
+        const courseId = req.params.id;
+
+        const courseExist = userCourseList.find((course) => course?._id.toString() === courseId);
+        if (!courseExist) {
+            return next(new ErrorHandler("You are not eligible to access this course", 400));
+        }
+
+        const course = await CourseModel.findById(courseId);
+        const content = course?.courseData;
+
+        res.status(200).json({
+            success: true,
+            content,
+        });
+    } catch (err) {
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
+//* add question in course:
+const addQuestion = CatchAsyncError(async (req, res, next) => {
+    try {
+        const { question, courseId, contentId } = req.body;
+    } catch (err) {
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
+module.exports = {
+    uploadCourse,
+    editCourse,
+    getSingleCourse,
+    getAllCourses,
+    getCourseByUser,
+    addQuestion,
+};

@@ -45,7 +45,7 @@ const userSchema = new mongoose.Schema(
     { timestamps: true },
 );
 
-// hash password before saving:
+//* hash password before saving:
 userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) {
         return next();
@@ -54,21 +54,21 @@ userSchema.pre("save", async function (next) {
     next();
 });
 
-// signin access token:
+//* signin access token:
 userSchema.methods.getJWTToken = function () {
     return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN, {
         expiresIn: "5m",
     });
 };
 
-// signin refresh token:
+//* signin refresh token:
 userSchema.methods.getRefreshToken = function () {
     return jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN, {
         expiresIn: "3d",
     });
 };
 
-// compare password:
+//* compare password:
 userSchema.methods.comparePassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 };
