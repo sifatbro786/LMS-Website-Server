@@ -4,6 +4,10 @@ const { cloudinary } = require("../utils/cloudinary");
 const { createCourse } = require("../services/course.service");
 const CourseModel = require("../models/course.model");
 const { redis } = require("../utils/redis");
+const mongoose = require("mongoose");
+const ejs = require("ejs");
+const path = require("path");
+const sendMail = require("../utils/sendMail");
 
 //* upload course:
 const uploadCourse = CatchAsyncError(async (req, res, next) => {
@@ -150,6 +154,101 @@ const getCourseByUser = CatchAsyncError(async (req, res, next) => {
 const addQuestion = CatchAsyncError(async (req, res, next) => {
     try {
         const { question, courseId, contentId } = req.body;
+        const course = await CourseModel.findById(courseId);
+
+        if (!mongoose.Types.ObjectId.isValid(contentId)) {
+            return next(new ErrorHandler("Invalid content id", 400));
+        }
+
+        const courseContent = course?.courseData.find((item) => item._id.equals(contentId));
+        if (!courseContent) {
+            return next(new ErrorHandler("Invalid content id", 400));
+        }
+
+        //? create a new question object:
+        const newQuestion = {
+            user: req.user,
+            question,
+            questionReplies: [],
+        };
+        //? add this question to our course content:
+        courseContent.questions.push(newQuestion);
+
+        //? save the updated course:
+        await course.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Question added successfully",
+            course,
+        });
+    } catch (err) {
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
+//* add answer in course question:
+const addAnswer = CatchAsyncError(async (req, res, next) => {
+    try {
+        const { answer, questionId, courseId, contentId } = req.body;
+        const course = await CourseModel.findById(courseId);
+
+        if (!mongoose.Types.ObjectId.isValid(contentId)) {
+            return next(new ErrorHandler("Invalid content id", 400));
+        }
+
+        const courseContent = course?.courseData.find((item) => item._id.equals(contentId));
+        if (!courseContent) {
+            return next(new ErrorHandler("Invalid content id", 400));
+        }
+
+        const question = courseContent?.questions.find((item) => item._id.equals(questionId));
+        if (!question) {
+            return next(new ErrorHandler("Invalid question id", 400));
+        }
+
+        //? create a new answer object:
+        const newAnswer = {
+            user: req.user,
+            answer,
+        };
+
+        //? add this answer to our course question:
+        question.questionReplies.push(newAnswer);
+
+        //? save the updated course:
+        await course.save();
+
+        if (req.user?._id === question?.user?._id) {
+            // TODO: create notification:
+        } else {
+            const data = {
+                name: question?.user?.name,
+                title: courseContent?.title,
+            };
+
+            const html = await ejs.renderFile(
+                path.join(__dirname, "../mails/question-reply.ejs"),
+                data,
+            );
+
+            try {
+                await sendMail({
+                    email: question?.user?.email,
+                    subject: "New reply on your question",
+                    template: "question-reply.ejs",
+                    data,
+                });
+            } catch (err) {
+                return next(new ErrorHandler(err.message, 500));
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Answer added successfully",
+            course,
+        });
     } catch (err) {
         return next(new ErrorHandler(err.message, 500));
     }
@@ -162,4 +261,5 @@ module.exports = {
     getAllCourses,
     getCourseByUser,
     addQuestion,
+    addAnswer,
 };

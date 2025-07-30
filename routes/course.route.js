@@ -7,6 +7,8 @@ const {
     getSingleCourse,
     getAllCourses,
     getCourseByUser,
+    addQuestion,
+    addAnswer,
 } = require("../controllers/course.controller");
 
 const courseRouter = express.Router();
@@ -16,5 +18,7 @@ courseRouter.put("/edit-course/:id", isAuthenticated, authorizeRoles("admin"), e
 courseRouter.get("/get-course/:id", getSingleCourse);
 courseRouter.get("/get-courses", getAllCourses);
 courseRouter.get("/get-course-content/:id", isAuthenticated, getCourseByUser);
+courseRouter.put("/add-question", isAuthenticated, addQuestion);
+courseRouter.put("/add-answer", isAuthenticated, addAnswer);
 
 module.exports = courseRouter;
