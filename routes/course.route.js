@@ -9,6 +9,8 @@ const {
     getCourseByUser,
     addQuestion,
     addAnswer,
+    addReview,
+    addReplyToReview,
 } = require("../controllers/course.controller");
 
 const courseRouter = express.Router();
@@ -20,5 +22,7 @@ courseRouter.get("/get-courses", getAllCourses);
 courseRouter.get("/get-course-content/:id", isAuthenticated, getCourseByUser);
 courseRouter.put("/add-question", isAuthenticated, addQuestion);
 courseRouter.put("/add-answer", isAuthenticated, addAnswer);
+courseRouter.put("/add-review/:id", isAuthenticated, addReview);
+courseRouter.put("/add-reply", isAuthenticated, authorizeRoles("admin"), addReplyToReview);
 
 module.exports = courseRouter;

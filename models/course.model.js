@@ -7,6 +7,7 @@ const reviewSchema = new mongoose.Schema({
         default: 0,
     },
     comment: String,
+    commentReplies: [Object],
 });
 
 const linkSchema = new mongoose.Schema({
