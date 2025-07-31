@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser");
 const { errorMiddleware } = require("./middleware/error");
 const userRouter = require("./routes/user.route");
 const courseRouter = require("./routes/course.route");
+const orderRouter = require("./routes/order.route");
 
 const app = express();
 
@@ -11,7 +12,7 @@ const app = express();
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-//* cookie parser: 
+//* cookie parser:
 app.use(cookieParser());
 
 const allowedOrigins = process.env.ORIGIN?.split(",") || [];
@@ -24,8 +25,7 @@ app.use(
 );
 
 //* routes:
-app.use("/api/v1", userRouter);
-app.use("/api/v1", courseRouter);
+app.use("/api/v1", userRouter, courseRouter, orderRouter);
 
 //* testing route
 app.get("/", (req, res) => {
