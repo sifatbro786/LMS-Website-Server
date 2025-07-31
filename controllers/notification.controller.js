@@ -1,10 +1,7 @@
 const { CatchAsyncError } = require("../middleware/catchAsyncError");
 const ErrorHandler = require("../utils/ErrorHandler");
-const CourseModel = require("../models/course.model");
-const UserModel = require("../models/user.model");
 const NotificationModel = require("../models/notification.model");
-const path = require("path");
-const ejs = require("ejs");
+const cron = require("node-cron");
 
 //* get all notification --- only for admin:
 const getNotifications = CatchAsyncError(async (req, res) => {
@@ -40,6 +37,14 @@ const updateNotification = CatchAsyncError(async (req, res) => {
     } catch (err) {
         return next(new ErrorHandler(err.message, 500));
     }
+});
+
+//* delete notification -- only for admin:
+cron.schedule("0 0 0 * * *", async () => {
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    await NotificationModel.deleteMany({ status: "read", createdAt: { $lt: thirtyDaysAgo } });
+
+    console.log("Deleted notifications older than 30 days");
 });
 
 module.exports = { getNotifications, updateNotification };
