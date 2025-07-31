@@ -2,9 +2,10 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const { errorMiddleware } = require("./middleware/error");
-const userRouter = require("./routes/user.route");
-const courseRouter = require("./routes/course.route");
-const orderRouter = require("./routes/order.route");
+const userRoute = require("./routes/user.route");
+const courseRoute = require("./routes/course.route");
+const orderRoute = require("./routes/order.route");
+const notificationRoute = require("./routes/notification.route");
 
 const app = express();
 
@@ -25,7 +26,7 @@ app.use(
 );
 
 //* routes:
-app.use("/api/v1", userRouter, courseRouter, orderRouter);
+app.use("/api/v1", userRoute, courseRoute, orderRoute, notificationRoute);
 
 //* testing route
 app.get("/", (req, res) => {

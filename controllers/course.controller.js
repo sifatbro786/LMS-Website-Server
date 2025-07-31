@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 const ejs = require("ejs");
 const path = require("path");
 const sendMail = require("../utils/sendMail");
+const notificationModel = require("../models/notification.model");
 
 //* upload course:
 const uploadCourse = CatchAsyncError(async (req, res, next) => {
@@ -174,6 +175,13 @@ const addQuestion = CatchAsyncError(async (req, res, next) => {
         //? add this question to our course content:
         courseContent.questions.push(newQuestion);
 
+        //? send notification to admin:
+        await notificationModel.create({
+            user: req.user?._id,
+            title: "New Question Received",
+            message: `${req.user.name} has asked a question in ${courseContent.title}`,
+        });
+
         //? save the updated course:
         await course.save();
 
@@ -220,7 +228,12 @@ const addAnswer = CatchAsyncError(async (req, res, next) => {
         await course.save();
 
         if (req.user?._id === question?.user?._id) {
-            // TODO: create notification:
+            //? send notification to admin:
+            await notificationModel.create({
+                user: req.user?._id,
+                title: "New Question Reply Received",
+                message: `${req.user.name} has replied to your question in ${courseContent.title}`,
+            });
         } else {
             const data = {
                 name: question?.user?.name,

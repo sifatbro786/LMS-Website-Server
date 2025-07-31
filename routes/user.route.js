@@ -13,19 +13,19 @@ const {
     updateProfilePicture,
 } = require("../controllers/user.controller");
 
-const userRouter = express.Router();
+const userRoute = express.Router();
 
-userRouter.post("/registration", registrationUser);
-userRouter.post("/activate-user", activateUser);
-userRouter.post("/login", loginUser);
-userRouter.post("/social-auth", socialAuth);
+userRoute.post("/registration", registrationUser);
+userRoute.post("/activate-user", activateUser);
+userRoute.post("/login", loginUser);
+userRoute.post("/social-auth", socialAuth);
 
-userRouter.get("/logout", isAuthenticated, logoutUser);
-userRouter.get("/refresh", updateAccessToken);
-userRouter.get("/me", isAuthenticated, getUserInfo);
+userRoute.get("/logout", isAuthenticated, logoutUser);
+userRoute.get("/refresh", updateAccessToken);
+userRoute.get("/me", isAuthenticated, getUserInfo);
 
-userRouter.put("/update-user-info", isAuthenticated, updateUserInfo);
-userRouter.put("/update-user-password", isAuthenticated, updatePassword);
-userRouter.put("/update-user-avatar", isAuthenticated, updateProfilePicture);
+userRoute.put("/update-user-info", isAuthenticated, updateUserInfo);
+userRoute.put("/update-user-password", isAuthenticated, updatePassword);
+userRoute.put("/update-user-avatar", isAuthenticated, updateProfilePicture);
 
-module.exports = userRouter;
+module.exports = userRoute;

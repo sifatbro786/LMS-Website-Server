@@ -1,6 +1,5 @@
 const { CatchAsyncError } = require("../middleware/catchAsyncError");
 const ErrorHandler = require("../utils/ErrorHandler");
-const OrderModel = require("../models/order.model");
 const CourseModel = require("../models/course.model");
 const UserModel = require("../models/user.model");
 const NotificationModel = require("../models/notification.model");

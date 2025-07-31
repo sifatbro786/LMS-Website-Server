@@ -13,16 +13,16 @@ const {
     addReplyToReview,
 } = require("../controllers/course.controller");
 
-const courseRouter = express.Router();
+const courseRoute = express.Router();
 
-courseRouter.post("/create-course", isAuthenticated, authorizeRoles("admin"), uploadCourse);
-courseRouter.put("/edit-course/:id", isAuthenticated, authorizeRoles("admin"), editCourse);
-courseRouter.get("/get-course/:id", getSingleCourse);
-courseRouter.get("/get-courses", getAllCourses);
-courseRouter.get("/get-course-content/:id", isAuthenticated, getCourseByUser);
-courseRouter.put("/add-question", isAuthenticated, addQuestion);
-courseRouter.put("/add-answer", isAuthenticated, addAnswer);
-courseRouter.put("/add-review/:id", isAuthenticated, addReview);
-courseRouter.put("/add-reply", isAuthenticated, authorizeRoles("admin"), addReplyToReview);
+courseRoute.post("/create-course", isAuthenticated, authorizeRoles("admin"), uploadCourse);
+courseRoute.put("/edit-course/:id", isAuthenticated, authorizeRoles("admin"), editCourse);
+courseRoute.get("/get-course/:id", getSingleCourse);
+courseRoute.get("/get-courses", getAllCourses);
+courseRoute.get("/get-course-content/:id", isAuthenticated, getCourseByUser);
+courseRoute.put("/add-question", isAuthenticated, addQuestion);
+courseRoute.put("/add-answer", isAuthenticated, addAnswer);
+courseRoute.put("/add-review/:id", isAuthenticated, addReview);
+courseRoute.put("/add-reply", isAuthenticated, authorizeRoles("admin"), addReplyToReview);
 
-module.exports = courseRouter;
+module.exports = courseRoute;
