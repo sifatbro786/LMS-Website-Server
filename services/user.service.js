@@ -25,13 +25,13 @@ const getAllUsersService = async (req, res) => {
 };
 
 //* update user role:
-const updateUserRoleService = async (res, userId, role) => {
-    const user = await UserModel.findByIdAndUpdate(userId, { role }, { new: true });
+const updateUserRoleService = async (res, id, role) => {
+    const user = await UserModel.findByIdAndUpdate(id, { role }, { new: true });
 
     res.status(200).json({
         success: true,
         user,
     });
-} 
+};
 
 module.exports = { getUserById, getAllUsersService, updateUserRoleService };

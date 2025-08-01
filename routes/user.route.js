@@ -13,6 +13,7 @@ const {
     updateProfilePicture,
     getAllUsers,
     updateUserRole,
+    deleteUser,
 } = require("../controllers/user.controller");
 
 const userRoute = express.Router();
@@ -31,5 +32,7 @@ userRoute.put("/update-user-info", isAuthenticated, updateUserInfo);
 userRoute.put("/update-user-password", isAuthenticated, updatePassword);
 userRoute.put("/update-user-avatar", isAuthenticated, updateProfilePicture);
 userRoute.put("/update-user", isAuthenticated, authorizeRoles("admin"), updateUserRole);
+
+userRoute.delete("/delete-user/:id", isAuthenticated, authorizeRoles("admin"), deleteUser);
 
 module.exports = userRoute;

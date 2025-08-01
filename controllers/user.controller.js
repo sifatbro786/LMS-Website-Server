@@ -7,7 +7,11 @@ const sendMail = require("../utils/sendMail");
 const { CatchAsyncError } = require("../middleware/catchAsyncError");
 const { sendToken, accessTokenOptions, refreshTokenOptions } = require("../utils/jwt");
 const { redis } = require("../utils/redis");
-const { getUserById, getAllUsersService, updateUserRoleService } = require("../services/user.service");
+const {
+    getUserById,
+    getAllUsersService,
+    updateUserRoleService,
+} = require("../services/user.service");
 const { cloudinary } = require("../utils/cloudinary");
 
 //* register user:
@@ -322,9 +326,31 @@ const getAllUsers = CatchAsyncError(async (req, res, next) => {
 //* update user role --admin only:
 const updateUserRole = CatchAsyncError(async (req, res, next) => {
     try {
-        const { userId, role } = req.body;
+        const { id, role } = req.body;
 
-        updateUserRoleService(res, userId, role);
+        updateUserRoleService(res, id, role);
+    } catch (err) {
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
+//* delete user --admin only:
+const deleteUser = CatchAsyncError(async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const user = await UserModel.findById(id);
+        if (!user) {
+            return next(new ErrorHandler("User not found", 404));
+        }
+
+        await user.deleteOne({ id });
+        await redis.del(id);
+
+        res.status(200).json({
+            success: true,
+            message: "User deleted successfully!",
+        });
     } catch (err) {
         return next(new ErrorHandler(err.message, 500));
     }
@@ -344,4 +370,5 @@ module.exports = {
     updateProfilePicture,
     getAllUsers,
     updateUserRole,
+    deleteUser,
 };

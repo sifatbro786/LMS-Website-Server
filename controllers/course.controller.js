@@ -365,6 +365,28 @@ const getAllCoursesByAdmin = CatchAsyncError(async (req, res, next) => {
     }
 });
 
+//* delete course --admin only:
+const deleteCourse = CatchAsyncError(async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const course = await CourseModel.findById(id);
+        if (!course) {
+            return next(new ErrorHandler("Course not found", 404));
+        }
+
+        await course.deleteOne({ id });
+        await redis.del(id);
+
+        res.status(200).json({
+            success: true,
+            message: "Course deleted successfully!",
+        });
+    } catch (err) {
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
 module.exports = {
     uploadCourse,
     editCourse,
@@ -376,4 +398,5 @@ module.exports = {
     addReview,
     addReplyToReview,
     getAllCoursesByAdmin,
+    deleteCourse,
 };
