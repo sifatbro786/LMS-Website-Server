@@ -7,6 +7,7 @@ dotenv.config();
 
 const emailRegexPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+//! main layout 
 const userSchema = new mongoose.Schema(
     {
         name: {

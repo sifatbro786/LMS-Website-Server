@@ -33,6 +33,7 @@ const courseDataSchema = new mongoose.Schema({
     questions: [commentSchema],
 });
 
+//! main layout
 const courseSchema = new mongoose.Schema(
     {
         name: {
