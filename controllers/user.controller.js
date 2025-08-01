@@ -147,7 +147,7 @@ const updateAccessToken = CatchAsyncError(async (req, res, next) => {
 
         const session = await redis.get(decoded.id);
         if (!session) {
-            return next(new ErrorHandler("User not found", 400));
+            return next(new ErrorHandler("Please login to access this resources.", 400));
         }
 
         const user = JSON.parse(session);
@@ -162,6 +162,8 @@ const updateAccessToken = CatchAsyncError(async (req, res, next) => {
 
         res.cookie("access_token", accessToken, accessTokenOptions);
         res.cookie("refresh_token", refreshToken, refreshTokenOptions);
+
+        await redis.set(user._id, JSON.stringify(user), "EX", 604800);
 
         res.status(200).json({
             status: true,
