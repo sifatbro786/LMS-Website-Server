@@ -6,7 +6,7 @@ const NotificationModel = require("../models/notification.model");
 const path = require("path");
 const ejs = require("ejs");
 const sendMail = require("../utils/sendMail");
-const { newOrder } = require("../services/order.service");
+const { newOrder, getAllOrdersService } = require("../services/order.service");
 
 //* create order:
 const createOrder = CatchAsyncError(async (req, res, next) => {
@@ -81,6 +81,16 @@ const createOrder = CatchAsyncError(async (req, res, next) => {
     }
 });
 
+//* get all orders -- admin only:
+const getAllOrders = CatchAsyncError(async (req, res, next) => {
+    try {
+        getAllOrdersService(req, res);
+    } catch (err) {
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
 module.exports = {
     createOrder,
+    getAllOrders,
 };

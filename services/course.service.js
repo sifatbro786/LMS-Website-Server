@@ -1,6 +1,7 @@
-const CourseModel = require("../models/course.model");
 const { CatchAsyncError } = require("../middleware/catchAsyncError");
+const CourseModel = require("../models/course.model");
 
+//* create course:
 const createCourse = CatchAsyncError(async (data, res) => {
     const course = await CourseModel.create(data);
 
@@ -11,4 +12,14 @@ const createCourse = CatchAsyncError(async (data, res) => {
     });
 });
 
-module.exports = { createCourse };
+//* get all courses:
+const getAllCoursesService = async (req, res) => {
+    const courses = await CourseModel.find().sort({ createdAt: -1 });
+
+    res.status(200).json({
+        success: true,
+        courses,
+    });
+};
+
+module.exports = { createCourse, getAllCoursesService };

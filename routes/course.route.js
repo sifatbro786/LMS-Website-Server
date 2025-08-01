@@ -11,6 +11,7 @@ const {
     addAnswer,
     addReview,
     addReplyToReview,
+    getAllCoursesByAdmin,
 } = require("../controllers/course.controller");
 
 const courseRoute = express.Router();
@@ -19,6 +20,7 @@ courseRoute.post("/create-course", isAuthenticated, authorizeRoles("admin"), upl
 courseRoute.put("/edit-course/:id", isAuthenticated, authorizeRoles("admin"), editCourse);
 courseRoute.get("/get-course/:id", getSingleCourse);
 courseRoute.get("/get-courses", getAllCourses);
+courseRoute.get("/get-courses", isAuthenticated, authorizeRoles("admin"), getAllCoursesByAdmin);
 courseRoute.get("/get-course-content/:id", isAuthenticated, getCourseByUser);
 courseRoute.put("/add-question", isAuthenticated, addQuestion);
 courseRoute.put("/add-answer", isAuthenticated, addAnswer);

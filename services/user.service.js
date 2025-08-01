@@ -1,5 +1,7 @@
+const UserModel = require("../models/user.model");
 const { redis } = require("../utils/redis");
 
+//* get user by id:
 const getUserById = async (id, res) => {
     const userJson = await redis.get(id);
 
@@ -12,4 +14,14 @@ const getUserById = async (id, res) => {
     }
 };
 
-module.exports = { getUserById };
+//* get all users:
+const getAllUsersService = async (req, res) => {
+    const users = await UserModel.find().sort({ createdAt: -1 });
+
+    res.status(200).json({
+        success: true,
+        users,
+    });
+};
+
+module.exports = { getUserById, getAllUsersService };

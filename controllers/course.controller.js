@@ -1,7 +1,7 @@
 const { CatchAsyncError } = require("../middleware/catchAsyncError");
 const ErrorHandler = require("../utils/ErrorHandler");
 const { cloudinary } = require("../utils/cloudinary");
-const { createCourse } = require("../services/course.service");
+const { createCourse, getAllCoursesService } = require("../services/course.service");
 const CourseModel = require("../models/course.model");
 const { redis } = require("../utils/redis");
 const mongoose = require("mongoose");
@@ -356,6 +356,15 @@ const addReplyToReview = CatchAsyncError(async (req, res, next) => {
     }
 });
 
+//* get all courses -- admin only:
+const getAllCoursesByAdmin = CatchAsyncError(async (req, res, next) => {
+    try {
+        getAllCoursesService(req, res);
+    } catch (err) {
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
 module.exports = {
     uploadCourse,
     editCourse,
@@ -366,4 +375,5 @@ module.exports = {
     addAnswer,
     addReview,
     addReplyToReview,
+    getAllCoursesByAdmin,
 };

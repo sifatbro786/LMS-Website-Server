@@ -1,5 +1,5 @@
 const express = require("express");
-const { isAuthenticated } = require("../middleware/auth");
+const { isAuthenticated, authorizeRoles } = require("../middleware/auth");
 const {
     registrationUser,
     activateUser,
@@ -11,6 +11,7 @@ const {
     updateUserInfo,
     updatePassword,
     updateProfilePicture,
+    getAllUsers,
 } = require("../controllers/user.controller");
 
 const userRoute = express.Router();
@@ -23,6 +24,7 @@ userRoute.post("/social-auth", socialAuth);
 userRoute.get("/logout", isAuthenticated, logoutUser);
 userRoute.get("/refresh", updateAccessToken);
 userRoute.get("/me", isAuthenticated, getUserInfo);
+userRoute.get("/get-users", isAuthenticated, authorizeRoles("admin"), getAllUsers);
 
 userRoute.put("/update-user-info", isAuthenticated, updateUserInfo);
 userRoute.put("/update-user-password", isAuthenticated, updatePassword);

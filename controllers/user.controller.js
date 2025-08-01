@@ -7,7 +7,7 @@ const sendMail = require("../utils/sendMail");
 const { CatchAsyncError } = require("../middleware/catchAsyncError");
 const { sendToken, accessTokenOptions, refreshTokenOptions } = require("../utils/jwt");
 const { redis } = require("../utils/redis");
-const { getUserById } = require("../services/user.service");
+const { getUserById, getAllUsersService } = require("../services/user.service");
 const { cloudinary } = require("../utils/cloudinary");
 
 //* register user:
@@ -310,6 +310,15 @@ const updateProfilePicture = CatchAsyncError(async (req, res, next) => {
     }
 });
 
+//* get all users -- admin only:
+const getAllUsers = CatchAsyncError(async (req, res, next) => {
+    try {
+        getAllUsersService(req, res);
+    } catch (err) {
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
 module.exports = {
     registrationUser,
     createActivationToken,
@@ -322,4 +331,5 @@ module.exports = {
     updateUserInfo,
     updatePassword,
     updateProfilePicture,
+    getAllUsers,
 };
