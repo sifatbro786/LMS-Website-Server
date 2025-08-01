@@ -6,6 +6,7 @@ const userRoute = require("./routes/user.route");
 const courseRoute = require("./routes/course.route");
 const orderRoute = require("./routes/order.route");
 const notificationRoute = require("./routes/notification.route");
+const analyticsRoute = require("./routes/analytics.route");
 
 const app = express();
 
@@ -26,7 +27,7 @@ app.use(
 );
 
 //* routes:
-app.use("/api/v1", userRoute, courseRoute, orderRoute, notificationRoute);
+app.use("/api/v1", userRoute, courseRoute, orderRoute, notificationRoute, analyticsRoute);
 
 //* testing route
 app.get("/", (req, res) => {
