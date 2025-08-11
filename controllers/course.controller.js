@@ -9,6 +9,8 @@ const ejs = require("ejs");
 const path = require("path");
 const sendMail = require("../utils/sendMail");
 const notificationModel = require("../models/notification.model");
+const axios = require("axios");
+require("dotenv").config();
 
 //* upload course:
 const uploadCourse = CatchAsyncError(async (req, res, next) => {
@@ -387,6 +389,29 @@ const deleteCourse = CatchAsyncError(async (req, res, next) => {
     }
 });
 
+//* GENERATE VIDEO URL:
+const generateVideoUrl = CatchAsyncError(async (req, res, next) => {
+    try {
+        const { videoId } = req.body;
+
+        const response = await axios.post(
+            `https://dev.vdocipher.com/api/videos/${videoId}/otp`,
+            { ttl: 300 },
+            {
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    Authorization: `Apisecret ${process.env.VDOCIPHER_API_SECRET}`,
+                },
+            },
+        );
+        res.json(response.data);
+    } catch (err) {
+        console.error("VdoCipher OTP generation error:", err.response?.data || err.message);
+        return next(new ErrorHandler(err.message, 500));
+    }
+});
+
 module.exports = {
     uploadCourse,
     editCourse,
@@ -399,4 +424,5 @@ module.exports = {
     addReplyToReview,
     getAllCoursesByAdmin,
     deleteCourse,
+    generateVideoUrl,
 };

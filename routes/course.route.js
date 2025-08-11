@@ -13,11 +13,13 @@ const {
     addReplyToReview,
     getAllCoursesByAdmin,
     deleteCourse,
+    generateVideoUrl,
 } = require("../controllers/course.controller");
 
 const courseRoute = express.Router();
 
 courseRoute.post("/create-course", isAuthenticated, authorizeRoles("admin"), uploadCourse);
+courseRoute.post("/getVdoCipherOTP", generateVideoUrl);
 
 courseRoute.get("/get-course/:id", getSingleCourse);
 courseRoute.get("/get-courses", getAllCourses);
