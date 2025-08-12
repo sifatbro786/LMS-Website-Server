@@ -25,14 +25,32 @@ userRoute.post("/social-auth", socialAuth);
 
 userRoute.get("/logout", isAuthenticated, logoutUser);
 userRoute.get("/refresh", updateAccessToken);
-userRoute.get("/me", isAuthenticated, getUserInfo);
-userRoute.get("/get-users", isAuthenticated, authorizeRoles("admin"), getAllUsers);
+userRoute.get("/me", updateAccessToken, isAuthenticated, getUserInfo);
+userRoute.get(
+    "/get-users",
+    updateAccessToken,
+    isAuthenticated,
+    authorizeRoles("admin"),
+    getAllUsers,
+);
 
-userRoute.put("/update-user-info", isAuthenticated, updateUserInfo);
-userRoute.put("/update-user-password", isAuthenticated, updatePassword);
-userRoute.put("/update-user-avatar", isAuthenticated, updateProfilePicture);
-userRoute.put("/update-user", isAuthenticated, authorizeRoles("admin"), updateUserRole);
+userRoute.put("/update-user-info", updateAccessToken, isAuthenticated, updateUserInfo);
+userRoute.put("/update-user-password", updateAccessToken, isAuthenticated, updatePassword);
+userRoute.put("/update-user-avatar", updateAccessToken, isAuthenticated, updateProfilePicture);
+userRoute.put(
+    "/update-user",
+    updateAccessToken,
+    isAuthenticated,
+    authorizeRoles("admin"),
+    updateUserRole,
+);
 
-userRoute.delete("/delete-user/:id", isAuthenticated, authorizeRoles("admin"), deleteUser);
+userRoute.delete(
+    "/delete-user/:id",
+    updateAccessToken,
+    isAuthenticated,
+    authorizeRoles("admin"),
+    deleteUser,
+);
 
 module.exports = userRoute;

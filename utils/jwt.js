@@ -3,22 +3,21 @@ const { redis } = require("./redis");
 
 dotenv.config();
 
-//* parse .env variables to integrates with fallback values:
-const accessTokenExpire = parseInt(process.env.ACCESS_TOKEN_EXPIRE || "300", 10);
-const refreshTokenExpire = parseInt(process.env.REFRESH_TOKEN_EXPIRE || "1200", 10);
-
 //* options for cookies:
 const accessTokenOptions = {
-    expires: new Date(Date.now() + accessTokenExpire * 60 * 60 * 1000),
-    maxAge: accessTokenExpire * 60 * 60 * 1000,
+    expires: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
+    maxAge: 5 * 60 * 1000, // 5 minutes
     httpOnly: true,
     sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
 };
+
 const refreshTokenOptions = {
-    expires: new Date(Date.now() + refreshTokenExpire * 24 * 60 * 60 * 1000),
-    maxAge: refreshTokenExpire * 24 * 60 * 60 * 1000,
+    expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
+    maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days
     httpOnly: true,
     sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
 };
 
 const sendToken = (user, statusCode, res) => {

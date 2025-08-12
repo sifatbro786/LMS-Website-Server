@@ -8,7 +8,7 @@ const { CatchAsyncError } = require("../middleware/catchAsyncError");
 const { sendToken, accessTokenOptions, refreshTokenOptions } = require("../utils/jwt");
 const { redis } = require("../utils/redis");
 const {
-    getUserById,
+    // getUserById,
     getAllUsersService,
     updateUserRoleService,
 } = require("../services/user.service");
@@ -99,21 +99,41 @@ const activateUser = CatchAsyncError(async (req, res, next) => {
 const loginUser = CatchAsyncError(async (req, res, next) => {
     try {
         const { email, password } = req.body;
+
         if (!email || !password) {
             return next(new ErrorHandler("Please enter email and password", 400));
         }
 
         const user = await UserModel.findOne({ email }).select("+password");
+
         if (!user) {
             return next(new ErrorHandler("Invalid email or password", 400));
         }
 
-        const isPasswordMatched = await user.comparePassword(password);
-        if (!isPasswordMatched) {
+        const isPasswordMatch = await user.comparePassword(password);
+        if (!isPasswordMatch) {
             return next(new ErrorHandler("Invalid email or password", 400));
         }
 
-        sendToken(user, 200, res);
+        const accessToken = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN, {
+            expiresIn: "5m",
+        });
+        const refreshToken = jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN, {
+            expiresIn: "3d",
+        });
+
+        // Save session to Redis
+        await redis.set(user._id, JSON.stringify(user), "EX", 604800);
+
+        res.cookie("access_token", accessToken, accessTokenOptions);
+        res.cookie("refresh_token", refreshToken, refreshTokenOptions);
+
+        res.status(200).json({
+            success: true,
+            accessToken,
+            user,
+            message: "Logged in successfully",
+        });
     } catch (err) {
         return next(new ErrorHandler(err.message, 500));
     }
@@ -140,14 +160,19 @@ const logoutUser = CatchAsyncError(async (req, res, next) => {
 const updateAccessToken = CatchAsyncError(async (req, res, next) => {
     try {
         const refresh_token = req.cookies.refresh_token;
+
+        if (!refresh_token) {
+            return next(new ErrorHandler("Refresh token not found", 400));
+        }
+
         const decoded = jwt.verify(refresh_token, process.env.REFRESH_TOKEN);
         if (!decoded) {
-            return next(new ErrorHandler("Your refresh token is invalid", 400));
+            return next(new ErrorHandler("Invalid refresh token", 400));
         }
 
         const session = await redis.get(decoded.id);
         if (!session) {
-            return next(new ErrorHandler("Please login to access this resources.", 400));
+            return next(new ErrorHandler("Session expired, please login again", 400));
         }
 
         const user = JSON.parse(session);
@@ -163,22 +188,34 @@ const updateAccessToken = CatchAsyncError(async (req, res, next) => {
         res.cookie("access_token", accessToken, accessTokenOptions);
         res.cookie("refresh_token", refreshToken, refreshTokenOptions);
 
-        await redis.set(user._id, JSON.stringify(user), "EX", 604800);
+        // Extend Redis session
+        await redis.set(user._id, JSON.stringify(user), "EX", 604800); // 7 days
 
-        res.status(200).json({
-            status: true,
-            accessToken,
-        });
+        // For the refresh endpoint, return the token in response body too
+        if (req.path === "/refresh") {
+            return res.status(200).json({
+                success: true,
+                accessToken,
+                message: "Token refreshed successfully",
+            });
+        }
+
+        next();
     } catch (err) {
-        return next(new ErrorHandler(err.message, 500));
+        return next(new ErrorHandler(err.message, 400));
     }
 });
 
 //* get user info:
 const getUserInfo = CatchAsyncError(async (req, res, next) => {
     try {
-        const userId = req.user._id;
-        await getUserById(userId, res);
+        const user = req.user;
+
+        res.status(200).json({
+            success: true,
+            accessToken: req.cookies.access_token,
+            user,
+        });
     } catch (err) {
         return next(new ErrorHandler(err.message, 500));
     }
